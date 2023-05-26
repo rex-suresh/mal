@@ -1,19 +1,20 @@
 const readline = require('readline');
 const { stdin, stdout } = require('node:process');
-const rl = readline.createInterface({ input: stdin, output: stdin });
+const { read_str } = require('./reader');
+const { pr_str } = require('./printer');
 
-stdin.setEncoding('utf8');
-stdout.setEncoding('utf8');
+const rl = readline.createInterface({
+  input: stdin,
+  output: stdout
+});
 
 const READ = () => {
   return new Promise((resolve) => {
-    rl.question('rex> ', (input) => resolve(input));
+    rl.question('rex> ', (input) => resolve(read_str(input)));
   })
 }
 const EVAL = (string) => string;
-const PRINT = (result) => {
-  console.log(result)
-};
+const PRINT = (malValue) => console.log(pr_str(malValue));
 
 const repl = () => {
   READ()
