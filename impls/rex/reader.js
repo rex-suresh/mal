@@ -1,27 +1,48 @@
+const { MalList, MalSymbol, MalValue, MalVector, MalObject } = require('./types');
+
 const reg_exp = /[\s,]*(~@|[\[\]{}()'`~^@]|"(?:\\.|[^\\"])*"?|;.*|[^\s\[\]{}('"`,;)]*)/g
 
 const tokenize = (str) =>
-  [...str.matchAll(reg_exp)].map(match => match[1]);
+  [...str.matchAll(reg_exp)].map(match => match[1]).slice(0, -1);
 
-const read_list = (reader) => {
+const read_seq = (reader, closingSymbol) => {
   const ast = [];
 
-  while (reader.peek() != ')') {
+  while (reader.peek() != closingSymbol) {
+    if (reader.peek() === undefined) {
+      throw 'unbalanced';
+    }
+
     ast.push(read_form(reader));
   }
 
-  reader.next(); // Mutation
+  reader.next();
   return ast;
 }
 
+const read_list = (reader) => {
+  const ast = read_seq(reader, ')');
+  return new MalList(ast);
+}
+
+const read_vector = (reader) => {
+  const ast = read_seq(reader, ']');
+  return new MalVector(ast);
+}
+
+const read_object = (reader) => {
+  const ast = read_seq(reader, '}');
+  return new MalObject(ast);
+}
+
 const read_atom = (reader) => {
-  const token = reader.next(); // Mutation
+  const token = reader.next();
 
   if (token.match(/^-?[0-9]+$/)) {
-    return parseInt(token);
+    return new MalValue(parseInt(token));
   }
 
-  return token;
+  return new MalSymbol(token);
 }
 
 const read_form = (reader) => {
@@ -29,8 +50,14 @@ const read_form = (reader) => {
 
   switch (token) {
     case '(':
-      reader.next(); // Mutation
+      reader.next();
       return read_list(reader);
+    case '[':
+      reader.next();
+      return read_vector(reader);
+    case '{':
+      reader.next();
+      return read_object(reader);
     default:
       return read_atom(reader);
   }

@@ -8,21 +8,20 @@ const rl = readline.createInterface({
   output: stdout
 });
 
-const READ = () =>
-  new Promise((resolve) => {
-    rl.question('rex> ', (input) => resolve(read_str(input)));
-  })
-
+const READ = (input) => read_str(input);
 const EVAL = (string) => string;
-
-const PRINT = (malValue) =>
-  console.log(pr_str(malValue));
+const PRINT = (malValue) => console.log(pr_str(malValue));
+const rep = (str) => PRINT(EVAL(READ(str)));
 
 const repl = () => {
-  READ()
-    .then(EVAL)
-    .then(PRINT)
-    .then(repl)
+  rl.question('rex> ', (line) => {
+    try {
+      console.log(rep(line));
+    } catch (error) {
+      console.log(error);
+    }
+    repl();
+  });
 }
 
 repl();
