@@ -5,20 +5,20 @@ const rl = readline.createInterface({ input: stdin, output: stdin });
 stdin.setEncoding('utf8');
 stdout.setEncoding('utf8');
 
-const readInput = () => {
+const READ = () => {
   return new Promise((resolve) => {
-    rl.question('user> ', (input) => resolve(input));
+    rl.question('rex> ', (input) => resolve(input));
   })
 }
-const evalInput = (string) => string;
-const print = (result) => {
+const EVAL = (string) => string;
+const PRINT = (result) => {
   console.log(result)
 };
 
 const repl = () => {
-  readInput()
-    .then(evalInput)
-    .then(print)
+  READ()
+    .then(EVAL)
+    .then(PRINT)
     .then(repl)
 }
 
