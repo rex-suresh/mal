@@ -1,9 +1,12 @@
-const { MalList, MalSymbol, MalValue, MalVector, MalObject } = require('./types');
+const { MalList, MalSymbol, MalValue, MalVector, MalObject, MalNil, MalString }
+  = require('./types');
 
 const reg_exp = /[\s,]*(~@|[\[\]{}()'`~^@]|"(?:\\.|[^\\"])*"?|;.*|[^\s\[\]{}('"`,;)]*)/g
 
 const tokenize = (str) =>
-  [...str.matchAll(reg_exp)].map(match => match[1]).slice(0, -1);
+  [...str.matchAll(reg_exp)]
+    .map(match => match[1])
+    .slice(0, -1);
 
 const read_seq = (reader, closingSymbol) => {
   const ast = [];
@@ -35,11 +38,24 @@ const read_object = (reader) => {
   return new MalObject(ast);
 }
 
+const read_string = (reader) => {
+  const ast = read_seq(reader, '"');
+  return new MalString(ast);
+}
+
 const read_atom = (reader) => {
   const token = reader.next();
 
   if (token.match(/^-?[0-9]+$/)) {
     return new MalValue(parseInt(token));
+  }
+
+  if (['true', 'false'].includes(token)) {
+    return token === 'true';
+  }
+
+  if (token === 'nil') {
+    return new MalNil();
   }
 
   return new MalSymbol(token);
@@ -58,6 +74,9 @@ const read_form = (reader) => {
     case '{':
       reader.next();
       return read_object(reader);
+    case '"':
+      reader.next();
+      return read_string(reader);
     default:
       return read_atom(reader);
   }

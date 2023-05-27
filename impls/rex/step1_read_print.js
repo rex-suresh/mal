@@ -10,7 +10,7 @@ const rl = readline.createInterface({
 
 const READ = (input) => read_str(input);
 const EVAL = (string) => string;
-const PRINT = (malValue) => console.log(pr_str(malValue));
+const PRINT = (malValue) => pr_str(malValue);
 const rep = (str) => PRINT(EVAL(READ(str)));
 
 const repl = () => {
