@@ -11,10 +11,10 @@ const rl = readline.createInterface({
 });
 
 const repl_env = {
-  '+': (a, b) => new MalValue(a.value + b.value),
-  '*': (a, b) => new MalValue(a.value * b.value),
-  '-': (a, b) => new MalValue(a.value - b.value),
-  '/': (a, b) => new MalValue(a.value / b.value),
+  '+': (...args) => (args.reduce((a, b) => new MalValue(a.value + b.value))),
+  '*': (...args) => (args.reduce((a, b) => new MalValue(a.value * b.value))),
+  '-': (...args) => (args.reduce((a, b) => new MalValue(a.value - b.value))),
+  '/': (...args) => (args.reduce((a, b) => new MalValue(a.value / b.value))),
 };
 
 const eval_ast = (ast, env) => {
@@ -47,7 +47,8 @@ const EVAL = (ast, env) => {
 
   const [fn, ...args] = eval_ast(ast, env).value;
 
-  return args.reduce(fn);
+  return fn.apply(null, args);
+  // return args.reduce(fn);
 };
 const PRINT = (malValue) => pr_str(malValue);
 const rep = (str) => PRINT(EVAL(READ(str), repl_env));
