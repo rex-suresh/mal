@@ -2,7 +2,7 @@ const readline = require('readline');
 const { stdin, stdout } = require('process');
 const { read_str } = require('./reader');
 const { pr_str } = require('./printer');
-const { MalSymbol, MalList, MalValue } = require('./types');
+const { MalSymbol, MalList, MalValue, MalObject } = require('./types');
 const { MalVector } = require('./types');
 
 const rl = readline.createInterface({
