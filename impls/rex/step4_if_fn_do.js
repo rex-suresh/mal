@@ -45,18 +45,18 @@ const bindLet = (ast, env) => {
 }
 
 const ifFn = (ast, env) => {
-  const cond = ast.value[1].value;
-  const ifPart = ast.value[2].value;
-  const elsePart = ast.value[3].value;
-  const condition = EVAL(cond, env);
+  const condition = EVAL(ast.value[1], env);
+  const ifPart = ast.value[2];
+  const elsePart = ast.value[3];
 
   if (condition && !(condition instanceof MalNil)) {
     return EVAL(ifPart, env);
   }
 
-  if (elsePart) {
-    return EVAL(elsePart, env);
+  if (!elsePart && elsePart !== false) {
+    return new MalNil();
   }
+  return EVAL(elsePart, env);
 }
 
 const createList = (...args) => {
@@ -138,7 +138,6 @@ const EVAL = (ast, env) => {
     case 'let*': return bindLet(ast, env);
     case 'if': return ifFn(ast, env);
     case 'do': return doBlock(ast, env);
-    // case 'empty?': return isEmpty(ast, env);
   }
 
   const [fn, ...args] = eval_ast(ast, env).value;
