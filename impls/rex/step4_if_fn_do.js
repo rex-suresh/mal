@@ -1,9 +1,10 @@
 
 const readline = require('readline');
+const { isDeepStrictEqual } = require('util');
 const { stdin, stdout } = require('process');
 const { read_str } = require('./reader');
 const { pr_str } = require('./printer');
-const { MalSymbol, MalList, MalValue, MalObject, MalNil } = require('./types');
+const { MalSymbol, MalList, MalValue, MalNil } = require('./types');
 const { MalVector } = require('./types');
 const { Env } = require('./env');
 
@@ -17,7 +18,7 @@ const sub = (a, b) => new MalValue(a.value - b.value);
 const mul = (a, b) => new MalValue(a.value * b.value);
 const div = (a, b) => new MalValue(a.value / b.value);
 
-const equals = (a, b) => a === b;
+const equals = (a, b) => isDeepStrictEqual(a, b);
 const greaterThan = (a, b) => a > b;
 const lessThan = (a, b) => a < b;
 const lessThanEqual = (a, b) => a <= b;
@@ -64,9 +65,13 @@ const createList = (...args) => {
 }
 
 const doBlock = (ast, env) => {
-  const listItems = ast.value.slice(1);
-  listItems.forEach(item => EVAL(item, env));
-  return new MalNil(value); // returns last eval val
+  const exps = ast.value.slice(1);
+  const results = exps.map(item => EVAL(item, env));
+
+  if (results.length === 0) {
+    return new MalNil();
+  }
+  return results[results.length - 1];
 }
 
 const isList = (arg) => {
@@ -87,10 +92,10 @@ const countOf = (args) => {
 
 const binaryOperator = (pred) => (...args) => {
   for (let i = 1; i < args.length; i++) {
-    const RHS = args[i - 1].value;
-    const LHS = args[i].value;
+    const LHS = args[i - 1].value;
+    const RHS = args[i].value;
 
-    if (!(pred(RHS, LHS))) {
+    if (!(pred(LHS, RHS))) {
       return false;
     }
   }
@@ -99,10 +104,8 @@ const binaryOperator = (pred) => (...args) => {
 }
 
 
-const printAst = (args) => {
-  const list = args.map(item => EVAL(item, env)?.value || EVAL(item, env));
-
-  console.log(...list);
+const printAst = (...args) => {
+  console.log(...args.map(item => pr_str(item)));
   return new MalNil();
 }
 
@@ -158,7 +161,8 @@ env.set(new MalSymbol('>='), binaryOperator(greaterThanEqual));
 env.set(new MalSymbol('<'), binaryOperator(lessThan));
 env.set(new MalSymbol('<='), binaryOperator(lessThanEqual));
 env.set(new MalSymbol('count'), countOf);
-env.set(new MalSymbol('print'), printAst);
+env.set(new MalSymbol('prn'), printAst);
+env.set(new MalSymbol('println'), printAst);
 env.set(new MalSymbol('list'), createList);
 env.set(new MalSymbol('list?'), isList);
 env.set(new MalSymbol('empty?'), isEmpty);
