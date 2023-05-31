@@ -38,6 +38,63 @@ const bindLet = (ast, env) => {
   return new MalNil();
 }
 
+const ifFn = (ast, env) => {
+  const cond = ast.value[1].value;
+  const ifPart = ast.value[2].value;
+  const elsePart = ast.value[3].value;
+
+  if (EVAL(cond, env)) {
+    return EVAL(ifPart, env);
+  }
+
+  if (elsePart) {
+    return EVAL(elsePart, env);
+  }
+}
+
+const createList = (ast, env) => {
+  const listItems = ast.value.slice(1, ast.value.length);
+  const value = listItems.map(item => EVAL(item, env));
+
+  return new MalList(value);
+}
+
+const doBlock = (ast, env) => {
+  const listItems = ast.value.slice(1, ast.value.length);
+  listItems.forEach(item => EVAL(item, env));
+  return new MalNil(value);
+}
+
+const isList = (ast) => {
+  return ast.value[1] instanceof MalList;
+}
+
+const isEmpty = (ast, env) => {
+  const param = EVAL(ast.value[1], env);
+  return param.value.length === 0;
+}
+
+const countOf = (ast, env) => {
+  const list = ast.value[1];
+  if (list instanceof MalNil) {
+    return new MalValue(0);
+  }
+
+  return new MalValue(EVAL(list, env).count());
+}
+
+const greaterThan = (ast, env) => {
+  return true;
+}
+
+const lessThan = (ast, env) => {
+  return true;
+}
+
+const equals = (ast, env) => {
+  return true;
+}
+
 const eval_ast = (ast, env) => {
   if (ast instanceof MalSymbol) {
     return env.get(ast);
@@ -68,6 +125,15 @@ const EVAL = (ast, env) => {
   switch (ast.value[0].value) {
     case 'def!': return bindDef(ast, env);
     case 'let*': return bindLet(ast, env);
+    case 'if': return ifFn(ast, env);
+    case 'do': return doBlock(ast, env);
+    case 'list': return createList(ast, env);
+    case 'list?': return isList(ast);
+    case 'empty?': return isEmpty(ast, env);
+    case 'count': return countOf(ast, env);
+    case '>': return greaterThan(ast, env);
+    case '<': return lessThan(ast, env);
+    case '=': return equals(ast, env);
   }
 
   const [fn, ...args] = eval_ast(ast, env).value;
