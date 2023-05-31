@@ -17,6 +17,12 @@ const sub = (a, b) => new MalValue(a.value - b.value);
 const mul = (a, b) => new MalValue(a.value * b.value);
 const div = (a, b) => new MalValue(a.value / b.value);
 
+const equals = (a, b) => a === b;
+const greaterThan = (a, b) => a > b;
+const lessThan = (a, b) => a < b;
+const lessThanEqual = (a, b) => a <= b;
+const greaterThanEqual = (a, b) => a >= b;
+
 const bindDef = (ast, env) => {
   env.set(ast.value[1], EVAL(ast.value[2], env));
   return env.get(ast.value[1]);
@@ -42,8 +48,9 @@ const ifFn = (ast, env) => {
   const cond = ast.value[1].value;
   const ifPart = ast.value[2].value;
   const elsePart = ast.value[3].value;
+  const condition = EVAL(cond, env);
 
-  if (EVAL(cond, env)) {
+  if (condition && !(condition instanceof MalNil)) {
     return EVAL(ifPart, env);
   }
 
@@ -52,47 +59,51 @@ const ifFn = (ast, env) => {
   }
 }
 
-const createList = (ast, env) => {
-  const listItems = ast.value.slice(1, ast.value.length);
-  const value = listItems.map(item => EVAL(item, env));
-
-  return new MalList(value);
+const createList = (...args) => {
+  return new MalList(args);
 }
 
 const doBlock = (ast, env) => {
-  const listItems = ast.value.slice(1, ast.value.length);
+  const listItems = ast.value.slice(1);
   listItems.forEach(item => EVAL(item, env));
-  return new MalNil(value);
+  return new MalNil(value); // returns last eval val
 }
 
-const isList = (ast) => {
-  return ast.value[1] instanceof MalList;
+const isList = (arg) => {
+  return arg instanceof MalList;
 }
 
-const isEmpty = (ast, env) => {
-  const param = EVAL(ast.value[1], env);
-  return param.value.length === 0;
+const isEmpty = (args) => {
+  return args.value.length === 0;
 }
 
-const countOf = (ast, env) => {
-  const list = ast.value[1];
-  if (list instanceof MalNil) {
+const countOf = (args) => {
+  if (args instanceof MalNil) {
     return new MalValue(0);
   }
 
-  return new MalValue(EVAL(list, env).count());
+  return new MalValue(args.count());
 }
 
-const greaterThan = (ast, env) => {
+const binaryOperator = (pred) => (...args) => {
+  for (let i = 1; i < args.length; i++) {
+    const RHS = args[i - 1].value;
+    const LHS = args[i].value;
+
+    if (!(pred(RHS, LHS))) {
+      return false;
+    }
+  }
+
   return true;
 }
 
-const lessThan = (ast, env) => {
-  return true;
-}
 
-const equals = (ast, env) => {
-  return true;
+const printAst = (args) => {
+  const list = args.map(item => EVAL(item, env)?.value || EVAL(item, env));
+
+  console.log(...list);
+  return new MalNil();
 }
 
 const eval_ast = (ast, env) => {
@@ -127,13 +138,7 @@ const EVAL = (ast, env) => {
     case 'let*': return bindLet(ast, env);
     case 'if': return ifFn(ast, env);
     case 'do': return doBlock(ast, env);
-    case 'list': return createList(ast, env);
-    case 'list?': return isList(ast);
-    case 'empty?': return isEmpty(ast, env);
-    case 'count': return countOf(ast, env);
-    case '>': return greaterThan(ast, env);
-    case '<': return lessThan(ast, env);
-    case '=': return equals(ast, env);
+    // case 'empty?': return isEmpty(ast, env);
   }
 
   const [fn, ...args] = eval_ast(ast, env).value;
@@ -143,10 +148,21 @@ const EVAL = (ast, env) => {
 const PRINT = (malValue) => pr_str(malValue);
 
 const env = new Env(null);
-env.set(new MalSymbol('+'), (...args) => (args.reduce(add)))
-env.set(new MalSymbol('-'), (...args) => (args.reduce(sub)))
-env.set(new MalSymbol('*'), (...args) => (args.reduce(mul)))
-env.set(new MalSymbol('/'), (...args) => (args.reduce(div)))
+
+env.set(new MalSymbol('+'), (...args) => (args.reduce(add)));
+env.set(new MalSymbol('-'), (...args) => (args.reduce(sub)));
+env.set(new MalSymbol('*'), (...args) => (args.reduce(mul)));
+env.set(new MalSymbol('/'), (...args) => (args.reduce(div)));
+env.set(new MalSymbol('='), binaryOperator(equals));
+env.set(new MalSymbol('>'), binaryOperator(greaterThan));
+env.set(new MalSymbol('>='), binaryOperator(greaterThanEqual));
+env.set(new MalSymbol('<'), binaryOperator(lessThan));
+env.set(new MalSymbol('<='), binaryOperator(lessThanEqual));
+env.set(new MalSymbol('count'), countOf);
+env.set(new MalSymbol('print'), printAst);
+env.set(new MalSymbol('list'), createList);
+env.set(new MalSymbol('list?'), isList);
+env.set(new MalSymbol('empty?'), isEmpty);
 
 const rep = (str) => PRINT(EVAL(READ(str), env));
 
