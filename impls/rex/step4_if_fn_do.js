@@ -74,6 +74,23 @@ const doBlock = (ast, env) => {
   return results[results.length - 1];
 }
 
+const fnBlock = (ast, env) => {
+  const scopeEnv = new Env(env);
+
+  return (...args) => {
+    const bindings = ast.value[1].value;
+    for (let i = 0; i < bindings.length; i++) {
+      scopeEnv.set(bindings[i], EVAL(args[i], env));
+    }
+
+    const exp = ast.value[2];
+    if (exp || exp === false) {
+      return EVAL(exp, scopeEnv);
+    }
+    return new MalNil();
+  };
+}
+
 const isList = (arg) => {
   return arg instanceof MalList;
 }
@@ -141,6 +158,7 @@ const EVAL = (ast, env) => {
     case 'let*': return bindLet(ast, env);
     case 'if': return ifFn(ast, env);
     case 'do': return doBlock(ast, env);
+    case 'fn*': return fnBlock(ast, env);
   }
 
   const [fn, ...args] = eval_ast(ast, env).value;
