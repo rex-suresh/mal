@@ -59,7 +59,7 @@ const bindLet = (ast, env) => {
   return new MalNil();
 }
 
-const ifFn = (ast, env) => {
+const ifBlock = (ast, env) => {
   const condition = EVAL(ast.value[1], env);
   const ifPart = ast.value[2];
   const elsePart = ast.value[3];
@@ -115,7 +115,7 @@ const EVAL = (ast, env) => {
   switch (ast.value[0].value) {
     case 'def!': return bindDef(ast, env);
     case 'let*': return bindLet(ast, env);
-    case 'if': return ifFn(ast, env);
+    case 'if': return ifBlock(ast, env);
     case 'do': return doBlock(ast, env);
     case 'fn*': return fnBlock(ast, env);
   }

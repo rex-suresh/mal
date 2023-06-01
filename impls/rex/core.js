@@ -70,7 +70,7 @@ env.set(new MalSymbol('<'), binaryOperator(lessThan));
 env.set(new MalSymbol('<='), binaryOperator(lessThanEqual));
 env.set(new MalSymbol('count'), countOf);
 env.set(new MalSymbol('prn'), printAst);
-env.set(new MalSymbol('pr-str'), printAst);
+env.set(new MalSymbol('pr-str'), pr_str);
 env.set(new MalSymbol('println'), printAst);
 env.set(new MalSymbol('list'), createList);
 env.set(new MalSymbol('list?'), isList);
