@@ -87,16 +87,18 @@ env.set(new MalSymbol('>='), binaryOperator(greaterThanEqual));
 env.set(new MalSymbol('<'), binaryOperator(lessThan));
 env.set(new MalSymbol('<='), binaryOperator(lessThanEqual));
 env.set(new MalSymbol('count'), countOf);
-env.set(new MalSymbol('prn'), prn);
-env.set(new MalSymbol('pr-str'), (...args) => args.map(pr_str).join(' '));
-env.set(new MalSymbol('str'), str);
-env.set(new MalSymbol('println'), printLn);
 env.set(new MalSymbol('list'), createList);
 env.set(new MalSymbol('list?'), isList);
 env.set(new MalSymbol('empty?'), isEmpty);
 env.set(new MalSymbol('not'), notOf);
+env.set(new MalSymbol('str'), str);
+env.set(new MalSymbol('prn'), prn);
+env.set(new MalSymbol('pr-str'),
+  (...args) => new MalString(args.map(pr_str).join(' ')));
+env.set(new MalSymbol('println'), printLn);
 
+'apple'.
 
-module.exports = {
+  module.exports = {
   env
 };
