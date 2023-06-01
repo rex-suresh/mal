@@ -1,7 +1,7 @@
 const { isDeepStrictEqual } = require('util');
 
 const { Env } = require('./env');
-const { MalList, MalValue, MalNil, MalSymbol } = require('./types');
+const { MalList, MalValue, MalNil, MalSymbol, MalString } = require('./types');
 const { pr_str } = require('./printer');
 
 const add = (a, b) => new MalValue(a.value + b.value);
@@ -48,9 +48,25 @@ const createList = (...args) => {
   return new MalList(args);
 }
 
-const printAst = (...args) => {
+const printLn = (...args) => {
+  const args_list = args.map(item => {
+    if (item instanceof MalString) {
+      return item.value;
+    }
+    return pr_str(item)
+  });
+
+  console.log(...args_list);
+  return new MalNil();
+}
+
+const prn = (...args) => {
   console.log(...args.map(item => pr_str(item)));
   return new MalNil();
+}
+
+const str = (...args) => {
+  return args.map(item => pr_str(item)).join(' ');
 }
 
 const notOf = (arg) => {
@@ -69,9 +85,10 @@ env.set(new MalSymbol('>='), binaryOperator(greaterThanEqual));
 env.set(new MalSymbol('<'), binaryOperator(lessThan));
 env.set(new MalSymbol('<='), binaryOperator(lessThanEqual));
 env.set(new MalSymbol('count'), countOf);
-env.set(new MalSymbol('prn'), printAst);
+env.set(new MalSymbol('prn'), prn);
 env.set(new MalSymbol('pr-str'), pr_str);
-env.set(new MalSymbol('println'), printAst);
+env.set(new MalSymbol('str'), str);
+env.set(new MalSymbol('println'), printLn);
 env.set(new MalSymbol('list'), createList);
 env.set(new MalSymbol('list?'), isList);
 env.set(new MalSymbol('empty?'), isEmpty);
