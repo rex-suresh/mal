@@ -66,6 +66,16 @@ class MalString extends MalValue {
   }
 }
 
+class MalKeyword extends MalValue {
+  constructor(value) {
+    super(value);
+  }
+
+  pr_str() {
+    return this.value;
+  }
+}
+
 class MalNil extends MalValue {
   constructor() {
     super(null);
@@ -81,5 +91,5 @@ module.exports = {
   MalValue, MalSymbol,
   MalVector, MalObject,
   MalNil, MalString,
-  MalString
+  MalString, MalKeyword
 };

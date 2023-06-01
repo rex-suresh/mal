@@ -97,8 +97,6 @@ env.set(new MalSymbol('pr-str'),
   (...args) => new MalString(args.map(pr_str).join(' ')));
 env.set(new MalSymbol('println'), printLn);
 
-'apple'.
-
-  module.exports = {
+module.exports = {
   env
 };

@@ -1,4 +1,4 @@
-const { MalList, MalSymbol, MalValue, MalVector, MalObject, MalNil, MalString }
+const { MalList, MalSymbol, MalValue, MalVector, MalObject, MalNil, MalString, MalKeyword }
   = require('./types');
 
 const reg_exp = /[\s,]*(~@|[\[\]{}()'`~^@]|"(?:\\.|[^\\"])*"?|;.*|[^\s\[\]{}('"`,;)]*)/g
@@ -55,6 +55,10 @@ const read_atom = (reader) => {
 
   if (token.startsWith('"')) {
     return new MalString(token.slice(1, -1));
+  }
+
+  if (token.startsWith(':')) {
+    return new MalKeyword(token);
   }
 
   return new MalSymbol(token);
