@@ -38,11 +38,6 @@ const read_object = (reader) => {
   return new MalObject(ast);
 }
 
-const read_string = (reader) => {
-  const ast = read_seq(reader, '"');
-  return new MalString(ast);
-}
-
 const read_atom = (reader) => {
   const token = reader.next();
 
@@ -58,6 +53,9 @@ const read_atom = (reader) => {
     return new MalNil();
   }
 
+  if (token.startsWith('"')) {
+    return new MalString(token);
+  }
   return new MalSymbol(token);
 }
 
@@ -74,9 +72,6 @@ const read_form = (reader) => {
     case '{':
       reader.next();
       return read_object(reader);
-    case '"':
-      reader.next();
-      return read_string(reader);
     default:
       return read_atom(reader);
   }
