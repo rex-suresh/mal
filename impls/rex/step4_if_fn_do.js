@@ -26,7 +26,7 @@ const fnBlock = (ast, env) => {
         scopeEnv.set(name, new MalList(restArgs));
         i = bindings.length;
       } else {
-        scopeEnv.set(bindings[i], EVAL(args[i], env));
+        scopeEnv.set(bindings[i], EVAL(args[i], scopeEnv));
       }
     }
 

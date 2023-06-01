@@ -48,15 +48,17 @@ const createList = (...args) => {
   return new MalList(args);
 }
 
-const printLn = (...args) => {
-  const args_list = args.map(item => {
+const val_list = (args) => {
+  return args.map(item => {
     if (item instanceof MalString) {
       return item.value;
     }
     return pr_str(item)
-  });
+  })
+}
 
-  console.log(...args_list);
+const printLn = (...args) => {
+  console.log(...val_list(args));
   return new MalNil();
 }
 
@@ -66,7 +68,7 @@ const prn = (...args) => {
 }
 
 const str = (...args) => {
-  return args.map(item => pr_str(item)).join(' ');
+  return new MalString(val_list(args).join(''));
 }
 
 const notOf = (arg) => {
@@ -86,7 +88,7 @@ env.set(new MalSymbol('<'), binaryOperator(lessThan));
 env.set(new MalSymbol('<='), binaryOperator(lessThanEqual));
 env.set(new MalSymbol('count'), countOf);
 env.set(new MalSymbol('prn'), prn);
-env.set(new MalSymbol('pr-str'), pr_str);
+env.set(new MalSymbol('pr-str'), (...args) => args.map(pr_str).join(' '));
 env.set(new MalSymbol('str'), str);
 env.set(new MalSymbol('println'), printLn);
 env.set(new MalSymbol('list'), createList);
