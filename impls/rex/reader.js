@@ -54,8 +54,9 @@ const read_atom = (reader) => {
   }
 
   if (token.startsWith('"')) {
-    return new MalString(token);
+    return new MalString(token.slice(1, -1));
   }
+
   return new MalSymbol(token);
 }
 

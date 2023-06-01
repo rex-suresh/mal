@@ -54,7 +54,7 @@ const printAst = (...args) => {
 }
 
 const notOf = (arg) => {
-  return !(arg && arg !== null);
+  return !(arg && !(arg instanceof MalNil));
 }
 
 
@@ -79,14 +79,5 @@ env.set(new MalSymbol('not'), notOf);
 
 
 module.exports = {
-  add, sub,
-  mul, div,
-  equals, greaterThan,
-  lessThan,
-  lessThanEqual,
-  greaterThanEqual,
-  isList,
-  isEmpty, countOf,
-  binaryOperator,
   env
 };
