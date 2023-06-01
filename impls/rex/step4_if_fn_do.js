@@ -6,11 +6,7 @@ const { pr_str } = require('./printer');
 const { MalSymbol, MalList, MalNil } = require('./types');
 const { MalVector } = require('./types');
 const { Env } = require('./env');
-const {
-  add, div, equals, greaterThan,
-  greaterThanEqual, lessThan, lessThanEqual,
-  mul, sub, countOf, isEmpty,
-  isList, binaryOperator } = require('./core');
+const { env } = require('./core');
 
 const rl = readline.createInterface({
   input: stdin,
@@ -55,7 +51,6 @@ const bindLet = (ast, env) => {
   return new MalNil();
 }
 
-
 const ifFn = (ast, env) => {
   const condition = EVAL(ast.value[1], env);
   const ifPart = ast.value[2];
@@ -71,10 +66,6 @@ const ifFn = (ast, env) => {
   return EVAL(elsePart, env);
 }
 
-const createList = (...args) => {
-  return new MalList(args);
-}
-
 const doBlock = (ast, env) => {
   const exps = ast.value.slice(1);
   const results = exps.map(item => EVAL(item, env));
@@ -83,11 +74,6 @@ const doBlock = (ast, env) => {
     return new MalNil();
   }
   return results[results.length - 1];
-}
-
-const printAst = (...args) => {
-  console.log(...args.map(item => pr_str(item)));
-  return new MalNil();
 }
 
 const eval_ast = (ast, env) => {
@@ -109,6 +95,7 @@ const eval_ast = (ast, env) => {
 }
 
 const READ = (input) => read_str(input);
+
 const EVAL = (ast, env) => {
   if (!(ast instanceof MalList)) {
     return eval_ast(ast, env);
@@ -130,25 +117,6 @@ const EVAL = (ast, env) => {
 };
 
 const PRINT = (malValue) => pr_str(malValue);
-
-const env = new Env(null);
-
-env.set(new MalSymbol('+'), (...args) => (args.reduce(add)));
-env.set(new MalSymbol('-'), (...args) => (args.reduce(sub)));
-env.set(new MalSymbol('*'), (...args) => (args.reduce(mul)));
-env.set(new MalSymbol('/'), (...args) => (args.reduce(div)));
-env.set(new MalSymbol('='), binaryOperator(equals));
-env.set(new MalSymbol('>'), binaryOperator(greaterThan));
-env.set(new MalSymbol('>='), binaryOperator(greaterThanEqual));
-env.set(new MalSymbol('<'), binaryOperator(lessThan));
-env.set(new MalSymbol('<='), binaryOperator(lessThanEqual));
-env.set(new MalSymbol('count'), countOf);
-env.set(new MalSymbol('prn'), printAst);
-env.set(new MalSymbol('println'), printAst);
-env.set(new MalSymbol('list'), createList);
-env.set(new MalSymbol('list?'), isList);
-env.set(new MalSymbol('empty?'), isEmpty);
-
 const rep = (str) => PRINT(EVAL(READ(str), env));
 
 const repl = () => {
