@@ -199,3 +199,4 @@ const repl = () => {
 }
 
 repl();
+// (def! fact (fn* [x] (if (< x 1) 1 (* x (fact (- x 1))))))
