@@ -1,28 +1,38 @@
 
 const readline = require('readline');
-const { isDeepStrictEqual } = require('util');
 const { stdin, stdout } = require('process');
 const { read_str } = require('./reader');
 const { pr_str } = require('./printer');
-const { MalSymbol, MalList, MalValue, MalNil } = require('./types');
+const { MalSymbol, MalList, MalNil } = require('./types');
 const { MalVector } = require('./types');
 const { Env } = require('./env');
+const {
+  add, div, equals, greaterThan,
+  greaterThanEqual, lessThan, lessThanEqual,
+  mul, sub, countOf, isEmpty,
+  isList, binaryOperator } = require('./core');
 
 const rl = readline.createInterface({
   input: stdin,
   output: stdout
 });
 
-const add = (a, b) => new MalValue(a.value + b.value);
-const sub = (a, b) => new MalValue(a.value - b.value);
-const mul = (a, b) => new MalValue(a.value * b.value);
-const div = (a, b) => new MalValue(a.value / b.value);
+const fnBlock = (ast, env) => {
+  const scopeEnv = new Env(env);
 
-const equals = (a, b) => isDeepStrictEqual(a, b);
-const greaterThan = (a, b) => a > b;
-const lessThan = (a, b) => a < b;
-const lessThanEqual = (a, b) => a <= b;
-const greaterThanEqual = (a, b) => a >= b;
+  return (...args) => {
+    const bindings = ast.value[1].value;
+    for (let i = 0; i < bindings.length; i++) {
+      scopeEnv.set(bindings[i], EVAL(args[i], env));
+    }
+
+    const exp = ast.value[2];
+    if (exp || exp === false) {
+      return EVAL(exp, scopeEnv);
+    }
+    return new MalNil();
+  };
+}
 
 const bindDef = (ast, env) => {
   env.set(ast.value[1], EVAL(ast.value[2], env));
@@ -44,6 +54,7 @@ const bindLet = (ast, env) => {
 
   return new MalNil();
 }
+
 
 const ifFn = (ast, env) => {
   const condition = EVAL(ast.value[1], env);
@@ -73,53 +84,6 @@ const doBlock = (ast, env) => {
   }
   return results[results.length - 1];
 }
-
-const fnBlock = (ast, env) => {
-  const scopeEnv = new Env(env);
-
-  return (...args) => {
-    const bindings = ast.value[1].value;
-    for (let i = 0; i < bindings.length; i++) {
-      scopeEnv.set(bindings[i], EVAL(args[i], env));
-    }
-
-    const exp = ast.value[2];
-    if (exp || exp === false) {
-      return EVAL(exp, scopeEnv);
-    }
-    return new MalNil();
-  };
-}
-
-const isList = (arg) => {
-  return arg instanceof MalList;
-}
-
-const isEmpty = (args) => {
-  return args.value.length === 0;
-}
-
-const countOf = (args) => {
-  if (args instanceof MalNil) {
-    return new MalValue(0);
-  }
-
-  return new MalValue(args.count());
-}
-
-const binaryOperator = (pred) => (...args) => {
-  for (let i = 1; i < args.length; i++) {
-    const LHS = args[i - 1].value;
-    const RHS = args[i].value;
-
-    if (!(pred(LHS, RHS))) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
 
 const printAst = (...args) => {
   console.log(...args.map(item => pr_str(item)));
