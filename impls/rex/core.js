@@ -53,6 +53,10 @@ const printAst = (...args) => {
   return new MalNil();
 }
 
+const notOf = (arg) => {
+  return !(arg && arg !== null);
+}
+
 
 const env = new Env(null);
 env.set(new MalSymbol('+'), (...args) => (args.reduce(add)));
@@ -71,6 +75,7 @@ env.set(new MalSymbol('println'), printAst);
 env.set(new MalSymbol('list'), createList);
 env.set(new MalSymbol('list?'), isList);
 env.set(new MalSymbol('empty?'), isEmpty);
+env.set(new MalSymbol('not'), notOf);
 
 
 module.exports = {
