@@ -40,7 +40,7 @@ const bindLet = (ast, env) => {
 const ifBlock = (ast, env) => {
   const condition = EVAL(ast.value[1], env);
   const ifPart = ast.value[2];
-  const elsePart = ast.value[3];
+  const elsePart = ast.value[3] ?? new MalNil();
 
   return condition && !(condition instanceof MalNil) ? ifPart : elsePart;
 }
