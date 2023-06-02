@@ -75,8 +75,11 @@ const notOf = (arg) => {
   return !(arg && !(arg instanceof MalNil));
 }
 
+const pr_str_fn = (...args) => {
+  return new MalString(args.map(pr_str).join(' '));
+}
 
-const env = new Env(null);
+const env = new Env(null, [], []);
 env.set(new MalSymbol('+'), (...args) => (args.reduce(add)));
 env.set(new MalSymbol('-'), (...args) => (args.reduce(sub)));
 env.set(new MalSymbol('*'), (...args) => (args.reduce(mul)));
@@ -93,8 +96,7 @@ env.set(new MalSymbol('empty?'), isEmpty);
 env.set(new MalSymbol('not'), notOf);
 env.set(new MalSymbol('str'), str);
 env.set(new MalSymbol('prn'), prn);
-env.set(new MalSymbol('pr-str'),
-  (...args) => new MalString(args.map(pr_str).join(' ')));
+env.set(new MalSymbol('pr-str'), pr_str_fn);
 env.set(new MalSymbol('println'), printLn);
 
 module.exports = {
