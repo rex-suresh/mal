@@ -61,7 +61,11 @@ class MalString extends MalValue {
     super(value);
   }
 
-  pr_str() {
+  pr_str(readably) {
+    if (readably) {
+      return this.value;
+    }
+
     return '"' + this.value + '"';
   }
 }

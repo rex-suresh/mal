@@ -58,17 +58,17 @@ const val_list = (args) => {
 }
 
 const printLn = (...args) => {
-  console.log(...val_list(args));
+  console.log(args.map((item) => pr_str(item, true)).join(' '));
   return new MalNil();
 }
 
 const prn = (...args) => {
-  console.log(...args.map(item => pr_str(item)));
+  console.log('"' + args.map((item) => pr_str(item, true)).join(' ') + '"');
   return new MalNil();
 }
 
 const str = (...args) => {
-  return new MalString(val_list(args).join(''));
+  return new MalString(args.map((item) => pr_str(item)).join(''));
 }
 
 const notOf = (arg) => {
@@ -76,7 +76,8 @@ const notOf = (arg) => {
 }
 
 const pr_str_fn = (...args) => {
-  return new MalString(args.map(pr_str).join(' '));
+  return new
+    MalString(args.map((arg) => pr_str(arg, true)).join(' '));
 }
 
 const env = new Env(null, [], []);

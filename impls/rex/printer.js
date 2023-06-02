@@ -1,12 +1,8 @@
 const { MalValue } = require("./types");
 
-const pr_str = (malValue) => {
-  if (malValue instanceof Function) {
-    return '#<function>';
-  }
-
+const pr_str = (malValue, readably = false) => {
   if (malValue instanceof MalValue) {
-    return malValue.pr_str();
+    return malValue.pr_str(readably);
   }
 
   return malValue.toString();
