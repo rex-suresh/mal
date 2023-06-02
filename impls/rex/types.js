@@ -63,10 +63,10 @@ class MalString extends MalValue {
 
   pr_str(readably) {
     if (readably) {
-      return this.value;
+      return '"' + this.value + '"';
     }
 
-    return '"' + this.value + '"';
+    return this.value;
   }
 }
 

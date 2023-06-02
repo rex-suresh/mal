@@ -1,6 +1,6 @@
 const { MalValue } = require("./types");
 
-const pr_str = (malValue, readably = false) => {
+const pr_str = (malValue, readably = true) => {
   if (malValue instanceof MalValue) {
     return malValue.pr_str(readably);
   }

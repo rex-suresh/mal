@@ -48,36 +48,30 @@ const createList = (...args) => {
   return new MalList(args);
 }
 
-const val_list = (args) => {
-  return args.map(item => {
-    if (item instanceof MalString) {
-      return item.value;
-    }
-    return pr_str(item)
-  })
-}
-
 const printLn = (...args) => {
-  console.log(args.map((item) => pr_str(item, true)).join(' '));
+  console.log(args.map(
+    (item) => pr_str(item, false)).join(' '));
   return new MalNil();
 }
 
 const prn = (...args) => {
-  console.log('"' + args.map((item) => pr_str(item, true)).join(' ') + '"');
+  console.log(args.map(
+    (item) => pr_str(item, true)).join(' '));
   return new MalNil();
 }
 
 const str = (...args) => {
-  return new MalString(args.map((item) => pr_str(item)).join(''));
-}
-
-const notOf = (arg) => {
-  return !(arg && !(arg instanceof MalNil));
+  return new
+    MalString('"' + args.map((item) => pr_str(item, false)).join('') + '"');
 }
 
 const pr_str_fn = (...args) => {
   return new
     MalString(args.map((arg) => pr_str(arg, true)).join(' '));
+}
+
+const notOf = (arg) => {
+  return !(arg && !(arg instanceof MalNil));
 }
 
 const env = new Env(null, [], []);
