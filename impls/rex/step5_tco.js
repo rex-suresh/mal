@@ -26,11 +26,11 @@ const bindDef = (ast, env) => {
 }
 
 const bindLet = (ast, env) => {
-  const [bindings, ...forms] = ast.value.slice(1);
+  const [{ value }, ...forms] = ast.value.slice(1);
   const scopeEnv = new Env(env);
 
-  for (let i = 0; i < bindings.value.length; i = i + 2) {
-    scopeEnv.set(bindings.value[i], EVAL(bindings.value[i + 1], scopeEnv));
+  for (let i = 0; i < value.length; i = i + 2) {
+    scopeEnv.set(value[i], EVAL(value[i + 1], scopeEnv));
   }
 
   const doForms = new MalList([new MalSymbol('do'), ...forms]);
