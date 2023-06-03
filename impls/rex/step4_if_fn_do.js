@@ -98,10 +98,7 @@ const EVAL = (ast, env) => {
         const [fn, ...args] = eval_ast(ast, env).value;
         if (fn instanceof MalFunction) {
           ast = fn.value;
-          const oldEnv = fn.env;
-          const binds = fn.binds;
-
-          env = new Env(oldEnv, binds.value, args);
+          env = new Env(fn.env, fn.binds.value, args);
         } else {
           return fn.apply(null, args);
         }

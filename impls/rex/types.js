@@ -57,13 +57,19 @@ class MalVector extends MalValue {
 }
 
 class MalString extends MalValue {
+  static escapeSeq =
+    ["\a", "\b", "\e", "\f", "\n", "\r", "\t", "\v", "\\", "\'", "\nnn", "\cx"]
   constructor(value) {
     super(value);
   }
 
   pr_str(readably) {
     if (readably) {
-      return '"' + this.value + '"';
+      const quoteEscaped =
+        this.value
+          .replace(/\\/g, '\\\\')
+          .replace(/"/g, '\\\"');
+      return '"' + quoteEscaped + '"';
     }
 
     return this.value;

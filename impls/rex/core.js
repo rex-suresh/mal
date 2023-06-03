@@ -62,7 +62,7 @@ const prn = (...args) => {
 
 const str = (...args) => {
   return new
-    MalString('"' + args.map((item) => pr_str(item, false)).join('') + '"');
+    MalString(args.map((item) => pr_str(item, false)).join(''));
 }
 
 const pr_str_fn = (...args) => {
