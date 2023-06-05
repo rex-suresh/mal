@@ -1,3 +1,22 @@
+const pr_str = (malValue, readably = true) => {
+  if (malValue instanceof Function) {
+    return "#<function>";
+  }
+
+  if (malValue instanceof MalValue) {
+    return malValue.pr_str(readably);
+  }
+
+  return malValue.toString();
+};
+
+const createMalString = (str) => {
+  const val = str.replace(/\\(.)/g,
+    (_, captured) => captured === 'n' ? '\n' : captured)
+
+  return new MalString(val);
+}
+
 class MalValue {
   constructor(value) {
     this.value = value;
@@ -20,7 +39,7 @@ class MalList extends MalValue {
   }
 
   pr_str() {
-    return '(' + this.value.map(x => x.pr_str()).join(' ') + ')';
+    return '(' + this.value.map(x => pr_str(x)).join(' ') + ')';
   }
 
   isEmpty() {
@@ -38,7 +57,7 @@ class MalObject extends MalValue {
   }
 
   pr_str() {
-    return '{' + this.value.map(x => x.pr_str()).join(' ') + '}';
+    return '{' + this.value.map(x => pr_str(x)).join(' ') + '}';
   }
 }
 
@@ -48,7 +67,7 @@ class MalVector extends MalValue {
   }
 
   pr_str() {
-    return '[' + this.value.map(x => x.pr_str()).join(' ') + ']';
+    return '[' + this.value.map(x => pr_str(x)).join(' ') + ']';
   }
 
   count() {
@@ -57,8 +76,7 @@ class MalVector extends MalValue {
 }
 
 class MalString extends MalValue {
-  static escapeSeq =
-    ["\a", "\b", "\e", "\f", "\n", "\r", "\t", "\v", "\\", "\'", "\nnn", "\cx"]
+  static escapeSeq = ["\n"];
   constructor(value) {
     super(value);
   }
@@ -67,8 +85,9 @@ class MalString extends MalValue {
     if (readably) {
       const quoteEscaped =
         this.value
-          .replace(/\\/g, '\\\\')
-          .replace(/"/g, '\\\"');
+          .replace(/\\/g, "\\\\")
+          .replace(/"/g, '\\"')
+          .replace(/\n/g, "\\n");
       return '"' + quoteEscaped + '"';
     }
 
@@ -87,14 +106,43 @@ class MalKeyword extends MalValue {
 }
 
 class MalFunction extends MalValue {
-  constructor(ast, binds, env) {
+  constructor(ast, binds, env, fn) {
     super(ast);
     this.binds = binds;
     this.env = env;
+    this.fn = fn;
   }
 
   pr_str() {
     return '#<function>';
+  }
+
+  apply(_, args) {
+    return this.fn.apply(null, args);
+  }
+}
+
+class MalAtom extends MalValue {
+  constructor(value) {
+    super(value);
+  }
+
+  pr_str(print_readably) {
+    return `(atom ${pr_str(this.value, print_readably)})`
+  }
+
+  deref() {
+    return this.value;
+  }
+
+  reset(value) {
+    this.value = value;
+    return this.value;
+  }
+
+  swap(fn, args) {
+    this.value = fn.apply(null, [this.value, ...args]);
+    return this.value;
   }
 }
 
@@ -114,5 +162,7 @@ module.exports = {
   MalVector, MalObject,
   MalNil, MalString,
   MalString, MalKeyword,
-  MalFunction
+  MalAtom,
+  MalFunction, createMalString,
+  pr_str
 };

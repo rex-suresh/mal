@@ -1,8 +1,10 @@
 const { isDeepStrictEqual } = require('util');
+const fs = require('fs');
 
 const { Env } = require('./env');
-const { MalList, MalValue, MalNil, MalSymbol, MalString } = require('./types');
+const { MalList, MalValue, MalNil, MalSymbol, MalString, MalAtom, createMalString } = require('./types');
 const { pr_str } = require('./printer');
+const { read_str } = require('./reader');
 
 const add = (a, b) => new MalValue(a.value + b.value);
 const sub = (a, b) => new MalValue(a.value - b.value);
@@ -75,24 +77,42 @@ const notOf = (arg) => {
 }
 
 const env = new Env(null, [], []);
-env.set(new MalSymbol('+'), (...args) => (args.reduce(add)));
-env.set(new MalSymbol('-'), (...args) => (args.reduce(sub)));
-env.set(new MalSymbol('*'), (...args) => (args.reduce(mul)));
-env.set(new MalSymbol('/'), (...args) => (args.reduce(div)));
-env.set(new MalSymbol('='), binaryOperator(equals));
-env.set(new MalSymbol('>'), binaryOperator(greaterThan));
-env.set(new MalSymbol('>='), binaryOperator(greaterThanEqual));
-env.set(new MalSymbol('<'), binaryOperator(lessThan));
-env.set(new MalSymbol('<='), binaryOperator(lessThanEqual));
-env.set(new MalSymbol('count'), countOf);
-env.set(new MalSymbol('list'), createList);
-env.set(new MalSymbol('list?'), isList);
-env.set(new MalSymbol('empty?'), isEmpty);
-env.set(new MalSymbol('not'), notOf);
-env.set(new MalSymbol('str'), str);
-env.set(new MalSymbol('prn'), prn);
-env.set(new MalSymbol('pr-str'), pr_str_fn);
-env.set(new MalSymbol('println'), printLn);
+const ns = {
+  '+': (...args) => (args.reduce(add)),
+  '-': (...args) => (args.reduce(sub)),
+  '*': (...args) => (args.reduce(mul)),
+  '/': (...args) => (args.reduce(div)),
+  '=': binaryOperator(equals),
+  '>': binaryOperator(greaterThan),
+  '>=': binaryOperator(greaterThanEqual),
+  '<': binaryOperator(lessThan),
+  '<=': binaryOperator(lessThanEqual),
+  'count': countOf,
+  'list': createList,
+  'list?': isList,
+  'empty?': isEmpty,
+  'not': notOf,
+  'str': str,
+  'prn': prn,
+  'pr-str': pr_str_fn,
+  'println': printLn,
+  'read-string': (string) => read_str(pr_str(string.value, false)),
+  'slurp': (filename) =>
+    createMalString(fs.readFileSync(filename.value, 'utf-8')),
+  'atom': (value) => new MalAtom(value),
+  'atom?': (value) => value instanceof MalAtom,
+  'deref': (atom) => atom.deref(),
+  'reset!': (atom, value) => atom.reset(value),
+  'swap!': (atom, fn, ...args) => atom.swap(fn, args),
+};
+
+const bindNS = () => {
+  Object.entries(ns).forEach(([symbol, fn]) => {
+    env.set(new MalSymbol(symbol), fn);
+  })
+}
+
+bindNS();
 
 module.exports = {
   env
