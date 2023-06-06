@@ -33,7 +33,17 @@ class MalSymbol extends MalValue {
   }
 }
 
-class MalList extends MalValue {
+class MalSeq extends MalValue {
+  constructor(value) {
+    super(value);
+  }
+
+  beginsWith(begins) {
+    return this.value[0]?.value === begins;
+  }
+}
+
+class MalList extends MalSeq {
   constructor(value) {
     super(value);
   }
@@ -49,6 +59,10 @@ class MalList extends MalValue {
   count() {
     return this.value.length;
   }
+
+  beginsWith(begins) {
+    return this.value[0]?.value === begins;
+  }
 }
 
 class MalObject extends MalValue {
@@ -61,7 +75,7 @@ class MalObject extends MalValue {
   }
 }
 
-class MalVector extends MalValue {
+class MalVector extends MalSeq {
   constructor(value) {
     super(value);
   }
@@ -76,7 +90,6 @@ class MalVector extends MalValue {
 }
 
 class MalString extends MalValue {
-  static escapeSeq = ["\n"];
   constructor(value) {
     super(value);
   }
@@ -162,7 +175,7 @@ module.exports = {
   MalVector, MalObject,
   MalNil, MalString,
   MalString, MalKeyword,
-  MalAtom,
+  MalAtom, MalSeq,
   MalFunction, createMalString,
   pr_str
 };

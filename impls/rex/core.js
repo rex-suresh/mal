@@ -2,7 +2,7 @@ const { isDeepStrictEqual } = require('util');
 const fs = require('fs');
 
 const { Env } = require('./env');
-const { MalList, MalValue, MalNil, MalSymbol, MalString, MalAtom, createMalString } = require('./types');
+const { MalList, MalValue, MalNil, MalSymbol, MalString, MalAtom, createMalString, MalVector } = require('./types');
 const { pr_str } = require('./printer');
 const { read_str } = require('./reader');
 
@@ -104,6 +104,9 @@ const ns = {
   'deref': (atom) => atom.deref(),
   'reset!': (atom, value) => atom.reset(value),
   'swap!': (atom, fn, ...args) => atom.swap(fn, args),
+  'cons': (value, list) => new MalList([value, ...list.value]),
+  'concat': (...lists) => new MalList(lists.flatMap(list => list.value)),
+  'vec': (args) => new MalVector(args.value),
 };
 
 const bindNS = () => {

@@ -2,7 +2,8 @@ const readline = require('readline');
 const { stdin, stdout, argv } = require('process');
 const { read_str } = require('./reader');
 const { pr_str } = require('./printer');
-const { MalSymbol, MalList, MalNil, MalFunction, createMalString } = require('./types');
+const { MalSymbol, MalList,
+  MalNil, MalFunction, createMalString, MalSeq } = require('./types');
 const { MalVector } = require('./types');
 const { Env } = require('./env');
 const { env } = require('./core');
@@ -83,6 +84,40 @@ const eval_ast = (ast, env) => {
   return ast;
 }
 
+const quasiQuote = (ast) => {
+  if (ast instanceof MalList && ast.beginsWith('unquote')) {
+    return ast.value[1];
+  }
+
+  if (ast instanceof MalSeq) {
+    let result = new MalList([]);
+    for (let index = ast.value.length - 1; index >= 0; index--) {
+      const element = ast.value[index];
+
+      if ((element instanceof MalList)
+        && element.beginsWith('splice-unquote')) {
+        result =
+          new MalList([new MalSymbol('concat'), element.value[1], result])
+      } else {
+        result =
+          new MalList([new MalSymbol('cons'), quasiQuote(element), result])
+      }
+    }
+
+    if (ast instanceof MalVector) {
+      return new MalList([new MalSymbol('vec'), result]);
+    }
+
+    return result;
+  }
+
+  if (ast instanceof MalSymbol) {
+    return new MalList([new MalSymbol('quote'), ast]);
+  }
+
+  return ast;
+};
+
 const READ = (input) => read_str(input);
 
 const EVAL = (ast, env) => {
@@ -107,6 +142,15 @@ const EVAL = (ast, env) => {
         break;
       case 'fn*':
         ast = fnBlock(ast, env);
+        break;
+      case 'quote':
+        return ast.value[1];
+      case 'unquote':
+        ast = ast.value[1];
+      case 'quasiquoteexpand':
+        return quasiQuote(ast.value[1]);
+      case 'quasiquote':
+        ast = quasiQuote(ast.value[1]);
         break;
       default:
         const [fn, ...args] = eval_ast(ast, env).value;
