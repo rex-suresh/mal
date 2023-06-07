@@ -107,6 +107,9 @@ const ns = {
   'cons': (value, list) => new MalList([value, ...list.value]),
   'concat': (...lists) => new MalList(lists.flatMap(list => list.value)),
   'vec': (args) => new MalVector(args.value),
+  'nth': (list, n) => list.nth(n.value),
+  'first': (list) => list instanceof MalNil ? new MalNil() : list.first(),
+  'rest': (list) => list instanceof MalNil ? new MalList([]) : list.rest(),
 };
 
 const bindNS = () => {
